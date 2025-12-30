@@ -20,11 +20,15 @@ os.chdir(workdir)
 
 
 
-warning20 = False
-warning10 = False
-warning5 = False
-warning80 = False
-warning90 = False
+
+CONFIG = {
+	"show_critical_warnings": True, # Show warnings at 10% and 5% battery
+	"show_health_warnings": True, # Show reminders at 20%, 80% and 90% battery to reduce hardware battery stress
+}
+
+
+
+
 
 BATTERY_STATES_BY_DESCRIPTION = {"unavailable": "-1", "charging": "2", "discharging": "3", "halted": "4", "full": "5"}
 BATTERY_STATES_BY_ID = {v: k for k, v in BATTERY_STATES_BY_DESCRIPTION.items()}
@@ -35,8 +39,22 @@ BATTERY_ICONS = {"empty": "assets/battery_empty.png",
 				 "red_charging": "assets/battery_red_charging.png",
 				 "yellow_charging": "assets/battery_yellow_charging.png",
 				 "green_charging": "assets/battery_green_charging.png",
+				 "red_shield": "assets/battery_red_shield.png",
 				 "green_shield": "assets/battery_green_shield.png",
 				 "full": "assets/battery_full.png"}
+
+CRITICAL_WARNINGS = [{"minimum": 0, "maximum": 5, "icon": BATTERY_ICONS["empty"], "reset": "above", "state": BATTERY_STATES_BY_DESCRIPTION["discharging"],
+					  	"title": "Battery level critical.", "message": "5% power left. Connect charger.", "warned": False},
+					 {"minimum": 5, "maximum": 10, "icon": BATTERY_ICONS["red"], "reset": "above", "state": BATTERY_STATES_BY_DESCRIPTION["discharging"],
+	   					"title": "Battery level low.", "title": "10% power left. Connect charger.", "warned": False}]
+
+HEALTH_WARNINGS = [{"minimum": 10, "maximum": 20, "icon": BATTERY_ICONS["red_shield"], "reset": "above", "state": BATTERY_STATES_BY_DESCRIPTION["discharging"],
+						"title": "Battery level low.", "message": "20% power left. Connect charger to reduce battery stress.", "warned": False},
+				   {"minimum": 80, "maximum": 90, "icon": BATTERY_ICONS["green_shield"], "reset": "below", "state": BATTERY_STATES_BY_DESCRIPTION["discharging"],
+						"title": "Battery level high.", "message": "80% power. Disconnect to reduce battery stress.", "warned": False},
+				   {"minimum": 90, "maximum": 100, "icon": BATTERY_ICONS["green_shield"], "reset": "below", "state": BATTERY_STATES_BY_DESCRIPTION["charging"],
+						"title": "Battery level very high.", "message": "90% power. Disconnect to reduce battery stress.", "warned": False}]
+
 
 
 def get_battery_info(): return subprocess.getoutput(["./get_phone_battery_adb.py"])
@@ -90,33 +108,39 @@ def update_indicator(event_src):
 	handle_warnings(percentage, state)
 
 
-def handle_warnings(percentage_int: int, state: str):
-	global warning5, warning10, warning20, warning80, warning90
+def handle_warnings(percentage: int, state: str):
+	global CRITICAL_WARNINGS, HEALTH_WARNINGS
 
-	charging = state == BATTERY_STATES_BY_DESCRIPTION["charging"];
+	if CONFIG["show_critical_warnings"]:
+		for warning in CRITICAL_WARNINGS:
+			if not warning["warned"] and state == warning["state"] and warning["minimum"] <= percentage <= warning["maximum"]:
+				post_notification(warning["icon"], warning["title"], warning["message"])
+				warning["warned"] = True
+				break
+		
+		for warning in CRITICAL_WARNINGS:
+			if warning["reset"] == "above":
+				if percentage > warning["maximum"]: warning["warned"] = False
+			elif warning["reset"] == "below":
+				if percentage < warning["minimum"]: warning["warned"] = False
 
-	if percentage_int > 5 and charging and warning5: warning5 = False
-	if percentage_int > 10 and charging and warning10: warning10 = False
-	if percentage_int > 20 and charging and warning20: warning20 = False
 
-	if percentage_int < 80 and not charging and warning80: warning80 = False
-	if percentage_int < 90 and not charging and warning90: warning90 = False
+	if CONFIG["show_health_warnings"]:
+		for warning in HEALTH_WARNINGS:
+			if not warning["warned"] and state == warning["state"] and warning["minimum"] <= percentage <= warning["maximum"]:
+				post_notification(warning["icon"], warning["title"], warning["message"])
+				warning["warned"] = True
+				break
+		
+		for warning in HEALTH_WARNINGS:
+			if warning["reset"] == "above":
+				if percentage > warning["maximum"]: warning["warned"] = False
+			elif warning["reset"] == "below":
+				if percentage < warning["minimum"]: warning["warned"] = False
 
-	if 0 <= percentage_int <= 5 and not charging and not warning5:
-		notification.notify(title="Phone Power Critical", message="5% power left, connect charger", app_name="phone_battery_indicator", app_icon=full_asset_path(BATTERY_ICONS["empty"]))
-		warning5 = True
-	elif 5 <= percentage_int <= 10 and not charging and not warning10:
-		notification.notify(title="Phone Power Low", message="10% power left, connect charger", app_name="phone_battery_indicator", app_icon=full_asset_path(BATTERY_ICONS["red"]))
-		warning10 = True
-	elif 10 <= percentage_int <= 20 and not charging and not warning20:
-		notification.notify(title="Phone Power Low", message="20% power, charge to reduce battery stress", app_name="phone_battery_indicator", app_icon=full_asset_path(BATTERY_ICONS["red"]))
-		warning20 = True
-	elif 89 >= percentage_int >= 80 and charging and not warning80:
-		notification.notify(title="Phone Power High", message="80% power, disconnect to reduce battery stress", app_name="phone_battery_indicator", app_icon=full_asset_path(BATTERY_ICONS["green"]))
-		warning80 = True
-	elif 100 >= percentage_int >= 90 and charging and not warning90:
-		notification.notify(title="Phone Power Very High", message="90% power, disconnect to reduce battery stress", app_name="phone_battery_indicator", app_icon=full_asset_path(BATTERY_ICONS["full"]))
-		warning90 = True
+
+def post_notification(icon, title, message): notification.notify(title=title, message=message, app_name="phone_battery_indicator", app_icon=full_asset_path(icon))
+
 
 
 def handle_update_button(event_src): update_indicator(event_src)
