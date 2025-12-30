@@ -14,8 +14,8 @@ except ValueError:
 	from gi.repository import AyatanaAppIndicator3 as AppIndicator3
 from gi.repository import Gtk, GLib
 
-workdir=os.path.dirname(os.path.abspath(sys.argv[0]))
-os.chdir(workdir)
+WORKDIR=os.path.dirname(os.path.abspath(sys.argv[0]))
+os.chdir(WORKDIR)
 
 
 
@@ -31,7 +31,9 @@ CONFIG = {
 
 
 BATTERY_STATES_BY_DESCRIPTION = {"unavailable": "-1", "charging": "2", "discharging": "3", "halted": "4", "full": "5"}
+
 BATTERY_STATES_BY_ID = {v: k for k, v in BATTERY_STATES_BY_DESCRIPTION.items()}
+
 BATTERY_ICONS = {"empty": "assets/battery_empty.png",
 				 "red": "assets/battery_red.png",
 				 "yellow": "assets/battery_yellow.png",
@@ -55,30 +57,6 @@ HEALTH_WARNINGS = [{"minimum": 10, "maximum": 20, "icon": BATTERY_ICONS["red_shi
 				   {"minimum": 90, "maximum": 100, "icon": BATTERY_ICONS["green_shield"], "reset": "below", "state": BATTERY_STATES_BY_DESCRIPTION["charging"],
 						"title": "Battery level very high.", "message": "90% power. Disconnect to reduce battery stress.", "warned": False}]
 
-
-
-def get_battery_info(): return subprocess.getoutput(["./get_phone_battery_adb.py"])
-def full_asset_path(path: str): return f"{workdir}/{path}"
-
-
-def battery_icon_path(state: str, percentage: int):
-	if state == BATTERY_STATES_BY_DESCRIPTION["full"]:
-		return BATTERY_ICONS["full"]
-	
-	elif state == BATTERY_STATES_BY_DESCRIPTION["halted"]:
-		return BATTERY_ICONS["green_shield"]
-	
-	elif state == BATTERY_STATES_BY_DESCRIPTION["charging"]:
-		if percentage > 75: return BATTERY_ICONS["green_charging"]
-		elif percentage > 30: return BATTERY_ICONS["yellow_charging"]
-		elif percentage > 0: return BATTERY_ICONS["red_charging"]
-
-	elif state == BATTERY_STATES_BY_DESCRIPTION["discharging"]:
-		if percentage > 75: return BATTERY_ICONS["green"]
-		elif percentage > 30: return BATTERY_ICONS["yellow"]
-		elif percentage > 0: return BATTERY_ICONS["red"]
-	
-	return BATTERY_ICONS["empty"]
 
 
 def update_indicator(event_src):
@@ -105,10 +83,11 @@ def update_indicator(event_src):
 
 	INDICATOR.set_menu(build_menu(tooltip))
 
-	handle_warnings(percentage, state)
+	send_warnings(percentage, state)
 
 
-def handle_warnings(percentage: int, state: str):
+
+def send_warnings(percentage: int, state: str):
 	global CRITICAL_WARNINGS, HEALTH_WARNINGS
 
 	if CONFIG["show_critical_warnings"]:
@@ -139,17 +118,11 @@ def handle_warnings(percentage: int, state: str):
 				if percentage < warning["minimum"]: warning["warned"] = False
 
 
+
+def get_battery_info(): return subprocess.getoutput(["./get_phone_battery_adb.py"])
+def full_asset_path(path: str): return f"{WORKDIR}/{path}"
 def post_notification(icon, title, message): notification.notify(title=title, message=message, app_name="phone_battery_indicator", app_icon=full_asset_path(icon))
 
-
-
-def handle_update_button(event_src): update_indicator(event_src)
-def handle_quit_button(event_src):	Gtk.main_quit()
-
-
-def auto_update():
-	update_indicator(None)
-	GLib.timeout_add(30000, auto_update)
 
 
 def build_menu(tooltip):
@@ -172,12 +145,45 @@ def build_menu(tooltip):
 	return menu
 
 
+
+def battery_icon_path(state: str, percentage: int):
+	if state == BATTERY_STATES_BY_DESCRIPTION["full"]:
+		return BATTERY_ICONS["full"]
+	
+	elif state == BATTERY_STATES_BY_DESCRIPTION["halted"]:
+		return BATTERY_ICONS["green_shield"]
+	
+	elif state == BATTERY_STATES_BY_DESCRIPTION["charging"]:
+		if percentage > 75: return BATTERY_ICONS["green_charging"]
+		elif percentage > 30: return BATTERY_ICONS["yellow_charging"]
+		elif percentage > 0: return BATTERY_ICONS["red_charging"]
+
+	elif state == BATTERY_STATES_BY_DESCRIPTION["discharging"]:
+		if percentage > 75: return BATTERY_ICONS["green"]
+		elif percentage > 30: return BATTERY_ICONS["yellow"]
+		elif percentage > 0: return BATTERY_ICONS["red"]
+	
+	return BATTERY_ICONS["empty"]
+
+
+
+def auto_update_timer():
+	update_indicator(None)
+	GLib.timeout_add(30000, auto_update_timer)
+
+
+
+def handle_update_button(event_src): update_indicator(event_src)
+def handle_quit_button(event_src):	Gtk.main_quit()
+
+
+
 if __name__ == "__main__":
 	APPINDICATOR_ID = "phone-battery-indicator"
 	INDICATOR = AppIndicator3.Indicator.new(APPINDICATOR_ID, full_asset_path(BATTERY_ICONS["empty"]), AppIndicator3.IndicatorCategory.HARDWARE)
 	INDICATOR.set_status(AppIndicator3.IndicatorStatus.ACTIVE)
 	INDICATOR.set_title("Phone Battery Indicator")
-	auto_update()
+	auto_update_timer()
 
 	Gtk.main()
 
