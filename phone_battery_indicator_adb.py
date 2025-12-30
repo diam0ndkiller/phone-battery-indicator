@@ -21,13 +21,39 @@ warning10 = False
 warning5 = False
 warning80 = False
 warning90 = False
-BATTERY_STATES = {"-1": "unavailable", "2": "charging", "3": "discharging", "5": "charged", }
-
+BATTERY_STATES = {"unavailable": "-1", "charging": "2", "discharging": "3", "halted": "4", "full": "5"}
+BATTERY_ICONS = {"empty": "assets/battery_empty.png",
+				 "red": "assets/battery_red.png",
+				 "yellow": "assets/battery_yellow.png",
+				 "green": "assets/battery_green.png",
+				 "red_charging": "assets/battery_red_charging.png",
+				 "yellow_charging": "assets/battery_yellow_charging.png",
+				 "green_charging": "assets/battery_green_charging.png",
+				 "green_halted": "assets/battery_green_halted.png",
+				 "full": "assets/battery_full.png"}
 
 def get_battery_info():
 	os.system("/home/diam0ndkiller/scripts/phone/get_phone_battery_adb.py")
 	with open("battery_data.txt", "r") as file: return file.read()
 
+def get_battery_icon(state: str, percentage: int):
+	if state == BATTERY_STATES["full"]:
+		return BATTERY_ICONS["full"]
+	
+	elif state == BATTERY_STATES["halted"]:
+		return BATTERY_ICONS["green_halted"]
+	
+	elif state == BATTERY_STATES["charging"]:
+		if percentage > 75: return BATTERY_ICONS["green_charging"]
+		elif percentage > 30: return BATTERY_ICONS["yellow_charging"]
+		elif percentage > 0: return BATTERY_ICONS["red_charging"]
+
+	elif state == BATTERY_STATES["discharging"]:
+		if percentage > 75: return BATTERY_ICONS["green"]
+		elif percentage > 30: return BATTERY_ICONS["yellow"]
+		elif percentage > 0: return BATTERY_ICONS["red"]
+	
+	return BATTERY_ICONS["empty"]
 
 def update_indicator(src):
 	global warning5, warning10, warning20, warning80, warning90, last_time_stamp, previous_last_time_stamp
@@ -56,18 +82,7 @@ def update_indicator(src):
 	percentage_int = int(percentage)
 	charging = state == "2"
 
-	if state == "5":
-		icon_path = "assets/battery_full.png"
-	elif charging:
-		if percentage_int > 75: icon_path = "assets/battery_charging_100.png"
-		elif percentage_int > 30: icon_path = "assets/battery_charging_60.png"
-		elif percentage_int > 0: icon_path = "assets/battery_charging_30.png"
-		else: icon_path = "assets/battery_empty.png"
-	else:
-		if percentage_int > 75: icon_path = "assets/battery_100.png"
-		elif percentage_int > 30: icon_path = "assets/battery_60.png"
-		elif percentage_int > 0: icon_path = "assets/battery_30.png"
-		else: icon_path = "assets/battery_empty.png"
+	icon_path = get_battery_icon(state, percentage_int)
 
 	print(icon_path)
 
