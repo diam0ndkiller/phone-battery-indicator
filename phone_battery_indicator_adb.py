@@ -69,7 +69,7 @@ def update_indicator(event_src):
 	ip = "unavailable"
 
 	battery_info = get_battery_info()
-	
+
 	if battery_info:
 		ip = battery_info.split("\n")[0]
 		for line in battery_info.split("\n"):
@@ -96,7 +96,7 @@ def send_warnings(percentage: int, state: str):
 				post_notification(warning["icon"], warning["title"], warning["message"])
 				warning["warned"] = True
 				break
-		
+
 		for warning in CRITICAL_WARNINGS:
 			if warning["reset"] == "above":
 				if percentage > warning["maximum"]: warning["warned"] = False
@@ -106,12 +106,11 @@ def send_warnings(percentage: int, state: str):
 
 	if CONFIG["show_health_warnings"]:
 		for warning in HEALTH_WARNINGS:
-			print(state, warning["state"])
 			if not warning["warned"] and state == warning["state"] and warning["minimum"] <= percentage <= warning["maximum"]:
 				post_notification(warning["icon"], warning["title"], warning["message"])
 				warning["warned"] = True
 				break
-		
+
 		for warning in HEALTH_WARNINGS:
 			if warning["reset"] == "above":
 				if percentage > warning["maximum"]: warning["warned"] = False
@@ -150,10 +149,10 @@ def build_menu(tooltip):
 def battery_icon_path(state: str, percentage: int):
 	if state == BATTERY_STATES_BY_DESCRIPTION["full"]:
 		return BATTERY_ICONS["full"]
-	
+
 	elif state == BATTERY_STATES_BY_DESCRIPTION["halted"]:
 		return BATTERY_ICONS["green_shield"]
-	
+
 	elif state == BATTERY_STATES_BY_DESCRIPTION["charging"]:
 		if percentage > 75: return BATTERY_ICONS["green_charging"]
 		elif percentage > 30: return BATTERY_ICONS["yellow_charging"]
@@ -163,7 +162,7 @@ def battery_icon_path(state: str, percentage: int):
 		if percentage > 75: return BATTERY_ICONS["green"]
 		elif percentage > 30: return BATTERY_ICONS["yellow"]
 		elif percentage > 0: return BATTERY_ICONS["red"]
-	
+
 	return BATTERY_ICONS["empty"]
 
 
