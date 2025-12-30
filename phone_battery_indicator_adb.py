@@ -52,7 +52,7 @@ CRITICAL_WARNINGS = [{"minimum": 0, "maximum": 5, "icon": BATTERY_ICONS["empty"]
 
 HEALTH_WARNINGS = [{"minimum": 10, "maximum": 20, "icon": BATTERY_ICONS["red_shield"], "reset": "above", "state": BATTERY_STATES_BY_DESCRIPTION["discharging"],
 						"title": "Battery level low.", "message": "20% power left. Connect charger to reduce battery stress.", "warned": False},
-				   {"minimum": 80, "maximum": 90, "icon": BATTERY_ICONS["green_shield"], "reset": "below", "state": BATTERY_STATES_BY_DESCRIPTION["discharging"],
+				   {"minimum": 80, "maximum": 90, "icon": BATTERY_ICONS["green_shield"], "reset": "below", "state": BATTERY_STATES_BY_DESCRIPTION["charging"],
 						"title": "Battery level high.", "message": "80% power. Disconnect to reduce battery stress.", "warned": False},
 				   {"minimum": 90, "maximum": 100, "icon": BATTERY_ICONS["green_shield"], "reset": "below", "state": BATTERY_STATES_BY_DESCRIPTION["charging"],
 						"title": "Battery level very high.", "message": "90% power. Disconnect to reduce battery stress.", "warned": False}]
@@ -106,6 +106,7 @@ def send_warnings(percentage: int, state: str):
 
 	if CONFIG["show_health_warnings"]:
 		for warning in HEALTH_WARNINGS:
+			print(state, warning["state"])
 			if not warning["warned"] and state == warning["state"] and warning["minimum"] <= percentage <= warning["maximum"]:
 				post_notification(warning["icon"], warning["title"], warning["message"])
 				warning["warned"] = True
