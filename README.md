@@ -1,5 +1,5 @@
 # Phone Battery Indicator
-This is a script that connects to a mobile device running android to display its battery level in a status indicator inside a Linux GTK-compatible desktop's status tray.
+This is a script that connects to a mobile device running android to display its battery level in a status indicator inside a GTK-compatible Linux desktop's status tray.
 
 ## Requirements
 Install the following packages to give Python access to the required libraries (list is for Ubuntu-based distros, may vary on others):
