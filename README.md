@@ -2,7 +2,7 @@
 This is a script that connects to a mobile device running android to display its battery level in a status indicator inside a GTK-compatible Linux desktop's status tray.
 
 ## Requirements
-Install the following packages to give Python access to the required libraries (list is for Ubuntu-based distros, may vary on others):
+Install the following packages to give Python access to the required libraries and tools (list is for Ubuntu-based distros, may vary on others):
 - `python3-gi`
 - `gir1.2-gtk-3.0`
 - `gir1.2-appindicator3-0.1` OR `gir1.2-ayatanaappindicator3-0.1` (try which one is able to install without breaking other apps)
