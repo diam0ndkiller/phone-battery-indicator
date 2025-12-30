@@ -57,17 +57,17 @@ def update_indicator(src):
 	charging = state == "2"
 
 	if state == "5":
-		icon_path = "battery_full.png"
+		icon_path = "assets/battery_full.png"
 	elif charging:
-		if percentage_int > 75: icon_path = "battery_charging_100.png"
-		elif percentage_int > 30: icon_path = "battery_charging_60.png"
-		elif percentage_int > 0: icon_path = "battery_charging_30.png"
-		else: icon_path = "battery_empty.png"
+		if percentage_int > 75: icon_path = "assets/battery_charging_100.png"
+		elif percentage_int > 30: icon_path = "assets/battery_charging_60.png"
+		elif percentage_int > 0: icon_path = "assets/battery_charging_30.png"
+		else: icon_path = "assets/battery_empty.png"
 	else:
-		if percentage_int > 75: icon_path = "battery_100.png"
-		elif percentage_int > 30: icon_path = "battery_60.png"
-		elif percentage_int > 0: icon_path = "battery_30.png"
-		else: icon_path = "battery_empty.png"
+		if percentage_int > 75: icon_path = "assets/battery_100.png"
+		elif percentage_int > 30: icon_path = "assets/battery_60.png"
+		elif percentage_int > 0: icon_path = "assets/battery_30.png"
+		else: icon_path = "assets/battery_empty.png"
 
 	print(icon_path)
 
