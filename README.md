@@ -22,3 +22,6 @@ This script connects to the first device from `phone_ips.txt` that has port 5542
 ```bash
 adb tcpip 5542
 ```
+
+> [!WARNING]
+> The tcpip mode will skip the modern adb pairing step and will instead fall back to allowing all devices that have been authorized to debug via USB.
