@@ -21,7 +21,8 @@ warning10 = False
 warning5 = False
 warning80 = False
 warning90 = False
-BATTERY_STATES = {"unavailable": "-1", "charging": "2", "discharging": "3", "halted": "4", "full": "5"}
+BATTERY_STATES_FROM_DESCRIPTION = {"unavailable": "-1", "charging": "2", "discharging": "3", "halted": "4", "full": "5"}
+BATTERY_STATES_FROM_ID = {v: k for k, v in BATTERY_STATES_FROM_DESCRIPTION.items()}
 BATTERY_ICONS = {"empty": "assets/battery_empty.png",
 				 "red": "assets/battery_red.png",
 				 "yellow": "assets/battery_yellow.png",
@@ -37,18 +38,18 @@ def get_battery_info():
 	with open("battery_data.txt", "r") as file: return file.read()
 
 def get_battery_icon(state: str, percentage: int):
-	if state == BATTERY_STATES["full"]:
+	if state == BATTERY_STATES_FROM_DESCRIPTION["full"]:
 		return BATTERY_ICONS["full"]
 	
-	elif state == BATTERY_STATES["halted"]:
+	elif state == BATTERY_STATES_FROM_DESCRIPTION["halted"]:
 		return BATTERY_ICONS["green_halted"]
 	
-	elif state == BATTERY_STATES["charging"]:
+	elif state == BATTERY_STATES_FROM_DESCRIPTION["charging"]:
 		if percentage > 75: return BATTERY_ICONS["green_charging"]
 		elif percentage > 30: return BATTERY_ICONS["yellow_charging"]
 		elif percentage > 0: return BATTERY_ICONS["red_charging"]
 
-	elif state == BATTERY_STATES["discharging"]:
+	elif state == BATTERY_STATES_FROM_DESCRIPTION["discharging"]:
 		if percentage > 75: return BATTERY_ICONS["green"]
 		elif percentage > 30: return BATTERY_ICONS["yellow"]
 		elif percentage > 0: return BATTERY_ICONS["red"]
@@ -112,7 +113,7 @@ def update_indicator(src):
 		warning90 = True
 
 	if percentage_int < 0: percentage = "N/A"
-	percentage += f"% ({BATTERY_STATES[state]})"
+	percentage += f"% ({BATTERY_STATES_FROM_ID[state]})"
 
 	print(ip, percentage)
 
