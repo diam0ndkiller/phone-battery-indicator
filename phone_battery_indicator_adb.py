@@ -35,7 +35,7 @@ BATTERY_ICONS = {"empty": "assets/battery_empty.png",
 				 "red_charging": "assets/battery_red_charging.png",
 				 "yellow_charging": "assets/battery_yellow_charging.png",
 				 "green_charging": "assets/battery_green_charging.png",
-				 "green_halted": "assets/battery_green_halted.png",
+				 "green_shield": "assets/battery_green_shield.png",
 				 "full": "assets/battery_full.png"}
 
 
@@ -48,7 +48,7 @@ def battery_icon_path(state: str, percentage: int):
 		return BATTERY_ICONS["full"]
 	
 	elif state == BATTERY_STATES_BY_DESCRIPTION["halted"]:
-		return BATTERY_ICONS["green_halted"]
+		return BATTERY_ICONS["green_shield"]
 	
 	elif state == BATTERY_STATES_BY_DESCRIPTION["charging"]:
 		if percentage > 75: return BATTERY_ICONS["green_charging"]
