@@ -161,7 +161,9 @@ def battery_icon_path(state: str, percentage: int):
 	elif state == BATTERY_STATES_BY_DESCRIPTION["discharging"]:
 		if percentage > 75: return BATTERY_ICONS["green"]
 		elif percentage > 30: return BATTERY_ICONS["yellow"]
-		elif percentage > 0: return BATTERY_ICONS["red"]
+		elif percentage > 0:
+			if percentage <= 20 and CONFIG["show_health_warnings"]: return BATTERY_ICONS["red_shield"]
+			else: return BATTERY_ICONS["red"]
 
 	return BATTERY_ICONS["empty"]
 
